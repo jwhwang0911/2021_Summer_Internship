@@ -1,3 +1,0 @@
-/home/cglab/raytracing.github.io/src/CMakeFiles/rebuild_cache.dir
-/home/cglab/raytracing.github.io/src/CMakeFiles/inOneWeekend.dir
-/home/cglab/raytracing.github.io/src/CMakeFiles/edit_cache.dir
