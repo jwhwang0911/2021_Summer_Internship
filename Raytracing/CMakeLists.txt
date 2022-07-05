@@ -16,12 +16,17 @@ set ( CMAKE_CXX_STANDARD 11 )
 
 set ( COMMON_ALL
   src/common/vec3.h
-
+  src/common/color.h
+  src/common/ray.h
+  src/common/rtweekend.h
 )
 
 set ( SOURCE_ONE_WEEKEND
   ${COMMON_ALL}
   src/InOneWeekend/main.cc
+  src/InOneWeekend/hittable.h
+  src/InOneWeekend/sphere.h
+  src/InOneWeekend/hittable_list.h
 )
 
 # Executables

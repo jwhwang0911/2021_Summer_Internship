@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/cglab/raytracing.github.io/src/InOneWeekend/main.cc
+color.h
+/home/cglab/raytracing.github.io/src/InOneWeekend/color.h
+ray.h
+/home/cglab/raytracing.github.io/src/InOneWeekend/ray.h
+vec3.h
+/home/cglab/raytracing.github.io/src/InOneWeekend/vec3.h
+iostream
+-
+
+common/color.h
+vec3.h
+common/vec3.h
+iostream
+-
+
+common/ray.h
+vec3.h
+common/vec3.h
+
+common/vec3.h
+cmath
+-
+iostream
+-
+
