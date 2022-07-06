@@ -19,6 +19,7 @@ set ( COMMON_ALL
   src/common/color.h
   src/common/ray.h
   src/common/rtweekend.h
+  src/common/camera.h
 )
 
 set ( SOURCE_ONE_WEEKEND
@@ -27,6 +28,7 @@ set ( SOURCE_ONE_WEEKEND
   src/InOneWeekend/hittable.h
   src/InOneWeekend/sphere.h
   src/InOneWeekend/hittable_list.h
+  src/InOneWeekend/material.h
 )
 
 # Executables

@@ -1,4 +1,4 @@
-# Install script for directory: /home/cglab/raytracing.github.io
+# Install script for directory: /home/cglab/Summer_Internship/Raytracing
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/cglab/raytracing.github.io/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/cglab/Summer_Internship/Raytracing/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

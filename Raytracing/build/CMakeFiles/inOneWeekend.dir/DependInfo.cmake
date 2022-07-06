@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/cglab/raytracing.github.io/src/InOneWeekend/main.cc" "/home/cglab/raytracing.github.io/build/CMakeFiles/inOneWeekend.dir/src/InOneWeekend/main.cc.o"
+  "/home/cglab/Summer_Internship/Raytracing/src/InOneWeekend/main.cc" "/home/cglab/Summer_Internship/Raytracing/build/CMakeFiles/inOneWeekend.dir/src/InOneWeekend/main.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/cglab/raytracing.github.io/src/common 
+CXX_INCLUDES = -I/home/cglab/Summer_Internship/Raytracing/src/common 
 

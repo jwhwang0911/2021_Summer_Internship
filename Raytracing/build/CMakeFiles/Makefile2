@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/cglab/raytracing.github.io
+CMAKE_SOURCE_DIR = /home/cglab/Summer_Internship/Raytracing
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/cglab/raytracing.github.io/build
+CMAKE_BINARY_DIR = /home/cglab/Summer_Internship/Raytracing/build
 
 #=============================================================================
 # Target rules for target CMakeFiles/inOneWeekend.dir
@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /home/cglab/raytracing.github.io/build
 CMakeFiles/inOneWeekend.dir/all:
 	$(MAKE) -f CMakeFiles/inOneWeekend.dir/build.make CMakeFiles/inOneWeekend.dir/depend
 	$(MAKE) -f CMakeFiles/inOneWeekend.dir/build.make CMakeFiles/inOneWeekend.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/cglab/raytracing.github.io/build/CMakeFiles --progress-num=1,2 "Built target inOneWeekend"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/cglab/Summer_Internship/Raytracing/build/CMakeFiles --progress-num=1,2 "Built target inOneWeekend"
 .PHONY : CMakeFiles/inOneWeekend.dir/all
 
 # Include target in all.
@@ -76,9 +76,9 @@ all: CMakeFiles/inOneWeekend.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/inOneWeekend.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/cglab/raytracing.github.io/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/cglab/Summer_Internship/Raytracing/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/inOneWeekend.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/cglab/raytracing.github.io/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/cglab/Summer_Internship/Raytracing/build/CMakeFiles 0
 .PHONY : CMakeFiles/inOneWeekend.dir/rule
 
 # Convenience name for target.
