@@ -22,7 +22,7 @@ def linear_regression(x_train,y_train,new_var,s,t):
     
     nb_epoch = 2000
     for epoch in range(nb_epoch):
-        prediction = model(x_train)
+        prediction = model(x_train) # When we call the model(parameter) instance, W*parameter + b will returned by __call__ in nn.Linear
         
         cost = F.mse_loss(prediction,y_train)
         

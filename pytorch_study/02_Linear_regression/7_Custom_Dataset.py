@@ -51,7 +51,7 @@ if __name__ == "__main__":
         ))
         
     # 임의의 입력 [73, 80, 75]를 선언
-    new_var =  torch.FloatTensor([[73, 80, 75]]) 
+    new_var =  torch.FloatTensor([[73, 80, 75]])    
     # 입력한 값 [73, 80, 75]에 대해서 예측값 y를 리턴받아서 pred_y에 저장
     pred_y = model(new_var) 
     print("훈련 후 입력이 73, 80, 75일 때의 예측값 :", pred_y) 
