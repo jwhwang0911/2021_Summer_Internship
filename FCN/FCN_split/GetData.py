@@ -8,7 +8,7 @@ import cv2
 import pdb
 import torch
 
-import FCN_split.exr as exr
+import exr
 
 path = "/rec/pvr1/deep_learning_denoising/renderings/test/"
 sorted_dir = sorted(os.listdir(path))

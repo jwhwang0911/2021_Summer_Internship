@@ -3,11 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from FCN_split.GetData import GetDataSet, transform
+from GetData import GetDataSet, transform
 
 from torch.utils.data import DataLoader
 
-import FCN_split.exr as exr
+import exr
 import numpy as np
 import time
 
