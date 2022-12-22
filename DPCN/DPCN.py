@@ -70,7 +70,7 @@ if __name__=="__main__":
     diffuse_optim = optim.Adam(diffuse_model.parameters(),lr=0.00001)
     specular_optim = optim.Adam(specular_model.parameters(),lr=0.00001)
     
-    epo = 0
+    epo = 100
     
     for epoch in range(epo):
         index = 0
@@ -101,9 +101,9 @@ if __name__=="__main__":
             specular_optim.step()
             epo_spe_loss += spe_loss   
             
-            if np.mod(index,100) == 1:    
-                print('epoch {}, {}/{}, specular loss is {}'.format(epoch, index, len(dataloader), spe_loss))
-                print('epoch {}, {}/{}, diffuse loss is {}'.format(epoch, index, len(dataloader), dif_loss))
+            # if np.mod(index,100) == 1:    
+            #     print('epoch {}, {}/{}, specular loss is {}'.format(epoch, index, len(dataloader), spe_loss))
+            #     print('epoch {}, {}/{}, diffuse loss is {}'.format(epoch, index, len(dataloader), dif_loss))
         print('epoch diffuse loss = %f'%(epo_dif_loss/len(dataloader)))
         print('epoch specular loss = %f'%(epo_spe_loss/len(dataloader)))
         print()

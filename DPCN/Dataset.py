@@ -1,7 +1,5 @@
 import os
 
-from numpy import diff, gradient
-
 import exr
 from gradient import gradient_exr
 from torch.utils.data import Dataset, DataLoader
@@ -22,7 +20,7 @@ class Data(Dataset):
       self.input_path = input_path
       self.raw_data_dir = sorted(os.listdir(path=input_path))
       self.transform = transform
-      self.file_len = 15
+      self.file_len = 5
       
       self.X_diffuse = None
       self.Y_diffuse = None
@@ -158,8 +156,8 @@ class Data(Dataset):
       return self.X_diffuse, self.Y_diffuse, self.X_specular, self.Y_specular, self.f_albedo
       
     def testset(self):
-      self.input_path
-      self.raw_data_dir = sorted(os.listdir(path=test_path))
+      self.input_path = i_path
+      self.raw_data_dir = sorted(os.listdir(path=self.input_path))
       self.preprocessing(0)
       return self.X_diffuse, self.Y_diffuse, self.X_specular, self.Y_specular, self.f_albedo
   

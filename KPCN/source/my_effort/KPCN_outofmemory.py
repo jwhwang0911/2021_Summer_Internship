@@ -1,0 +1,220 @@
+from Dataset import transform, output_path, test_path, input_path, dataloader, Data
+
+import torch
+import torch.optim as optim
+import torch.nn as nn
+import torch.nn.functional as F
+
+import numpy as np
+import exr
+
+def target_processing(target): # kernel : batchsize * 441 * 80 * 80 , target : batchsize * 3 * 100 * 100
+    target_r, target_g, target_b = torch.split(target, 1 ,dim=1)
+    r_x = []
+    g_x = []
+    b_x = []
+    
+    for i in range(21):
+        x_padding = nn.ZeroPad2d((-i,i,0,0))
+        r_x.append(x_padding(target_r))
+        g_x.append(x_padding(target_g))
+        b_x.append(x_padding(target_b))
+        
+    target_r = torch.cat(tuple(r_x),dim=1)
+    target_g = torch.cat(tuple(g_x),dim=1)
+    target_b = torch.cat(tuple(b_x),dim=1)
+    
+    r_x = []
+    g_x = []
+    b_x = []
+        
+    for i in range(21):
+        y_padding = nn.ZeroPad2d((0,0,-i,i))
+        r_x.append(y_padding(target_r))
+        g_x.append(y_padding(target_g))
+        b_x.append(y_padding(target_b))
+        
+    target_r = torch.cat(tuple(r_x),dim=1)
+    target_g = torch.cat(tuple(g_x),dim=1)
+    target_b = torch.cat(tuple(b_x),dim=1)
+        
+    return target_r[:,:,10:-10,10:-10], target_g[:,:,10:-10,10:-10], target_b[:,:,10:-10,10:-10]
+
+class KPCN(nn.Module):
+    def __init__(self,input_channels) -> None:
+        super().__init__()
+        
+        self.input_channels = input_channels
+        
+        self.Model_architechture = nn.Sequential(
+            nn.Conv2d(self.input_channels, 100, kernel_size=5, padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,100,kernel_size=5,padding=2,stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(100,441,kernel_size=5,padding=2,stride=1)
+        )
+        
+        self.Model_architechture.apply(self.__weight_init__)
+        
+    def __weight_init__(self,sub_layer):
+        if isinstance(sub_layer, nn.Conv2d):
+            nn.init.xavier_uniform_(sub_layer.weight)
+        
+        
+    def forward(self,x:torch.FloatTensor)->torch.FloatTensor:
+        x = self.Model_architechture(x)
+        x = F.softmax(x,dim=1)
+        
+        return x
+
+
+def get_n_params(model):
+    pp=0
+    for p in list(model.parameters()):
+        nn=1
+        for s in list(p.size()):
+            nn = nn*s
+        pp += nn
+    return pp
+    
+    
+if __name__=="__main__":
+    # test_data = Data(transform=transform,input_path = test_path)
+    # test_dif,y,test_spe,y_,f_albe, test_target_dif, test_target_spe = test_data.test_set()
+    # f_albe = f_albe.cuda()
+    # test_dif = test_dif.cuda().unsqueeze(dim=0)
+    # test_spe = test_spe.cuda().unsqueeze(dim=0)
+    
+    diffuse_model = KPCN(input_channels=27).cuda()
+    specular_model = KPCN(input_channels=27).cuda()
+    
+    criterion = nn.L1Loss().cuda()
+    diffuse_optim = optim.Adam(diffuse_model.parameters(),lr=0.00001)
+    specular_optim = optim.Adam(specular_model.parameters(),lr=0.00001)
+    
+    epo = 0
+    
+    data_num = 1
+    
+    for epoch in range(epo):
+        index = 0
+        epo_dif_loss = 0
+        epo_spe_loss = 0
+        
+        for x_dif, y_dif, x_spe, y_spe, tar_dif, tar_spe in dataloader:
+            index += 1
+            
+            #diffuse
+            x_dif = x_dif.cuda()
+            y_dif = y_dif.cuda()
+            tar_dif = tar_dif.cuda()
+
+            diffuse_optim.zero_grad()
+            dif_kernel = F.softmax(diffuse_model(x_dif),dim=1)
+            dif_r, dif_g, dif_b = target_processing(tar_dif)
+            dif_r, dif_g, dif_b = dif_r.cuda(), dif_g.cuda(), dif_b.cuda()
+            dif_r, dif_g, dif_b = (dif_r * dif_kernel).sum(dim=1).unsqueeze(dim=1), (dif_g * dif_kernel).sum(dim=1).unsqueeze(dim=1), (dif_b * dif_kernel).sum(dim=1).unsqueeze(dim=1)
+            dif_output = torch.cat((dif_r,dif_g,dif_b),dim=1)
+            dif_loss = criterion(dif_output,y_dif)
+            dif_loss.backward()
+            epo_dif_loss += dif_loss
+            diffuse_optim.step()
+            
+            #specular
+            x_spe = x_spe.cuda()
+            y_spe = y_spe.cuda()
+            tar_spe = tar_spe.cuda()
+            
+            specular_optim.zero_grad()
+            spe_kernel = F.softmax(specular_model(x_spe),dim=1)
+            spe_r, spe_g, spe_b = target_processing(tar_spe)
+            spe_r, spe_g, spe_b = spe_r.cuda(), spe_g.cuda(), spe_b.cuda()
+            spe_r, spe_g, spe_b = (spe_r * spe_kernel).sum(dim=1).unsqueeze(dim=1), (spe_g * spe_kernel).sum(dim=1).unsqueeze(dim=1), (spe_b * spe_kernel).sum(dim=1).unsqueeze(dim=1)
+            spe_output = torch.cat((spe_r, spe_g, spe_b),dim=1)
+            spe_loss = criterion(spe_output, y_spe)
+            spe_loss.backward()
+            epo_spe_loss += spe_loss
+            specular_optim.step()
+            
+            
+            if np.mod(index,100) == 1:    
+                print('epoch {}, {}/{}, specular loss is {}'.format(epoch, index, len(dataloader), spe_loss))
+                print('epoch {}, {}/{}, diffuse loss is {}'.format(epoch, index, len(dataloader), dif_loss))
+        print('epoch diffuse loss = %f'%(epo_dif_loss/len(dataloader)))
+        print('epoch specular loss = %f'%(epo_spe_loss/len(dataloader)))
+        print()
+        print()
+        print()
+        
+        # if epoch % 20 == 0:
+        #     dif_kernel = F.softmax(diffuse_model(test_dif))
+        #     dif_r, dif_g, dif_b = target_processing(test_target_dif)  
+        #     dif_r, dif_g, dif_b = dif_r.cuda(), dif_g.cuda(), dif_b.cuda()
+        #     dif_r, dif_g, dif_b = (dif_r * dif_kernel).sum(dim=1).unsqueeze(dim=1), (dif_g * dif_kernel).sum(dim=1).unsqueeze(dim=1), (dif_b * dif_kernel).sum(dim=1).unsqueeze(dim=1)
+        #     dif_output = torch.cat((dif_r,dif_g,dif_b),dim=1)
+        #     dif_output = dif_output.mul(f_albe + 0.00316)
+        #     dif_output = dif_output.squeeze()
+        #     dif_output = dif_output.swapaxes(1,2).swapaxes(0,2)
+        #     dif_output = dif_output.cpu().data.numpy().copy()
+        #     exr.write(output_path+"diffuse/"+"dif_output_trans"+str(epoch)+"epo.exr",dif_output)
+            
+        #     spe_kerenel = F.softmax(specular_model(test_spe),dim=1)
+        #     spe_r, spe_g, spe_b = target_processing(test_target_spe)
+        #     spe_r, spe_g, spe_b = spe_r.cuda(), spe_g.cuda(), spe_b.cuda()
+        #     spe_r, spe_g, spe_b = (spe_r * spe_kernel).sum(dim=1).unsqueeze(dim=1), (spe_g * spe_kernel).sum(dim=1).unsqueeze(dim=1), (spe_b * spe_kernel).sum(dim=1).unsqueeze(dim=1)
+        #     spe_output = torch.cat((spe_r, spe_g, spe_b),dim=1)
+        #     spe_output = torch.exp(spe_output)-1
+        #     spe_output = spe_output.squeeze()
+        #     spe_output = spe_output.swapaxes(1,2).swapaxes(0,2)
+        #     spe_output = spe_output.cpu().data.numpy().copy()
+        #     exr.write(output_path+"specular/"+"spe_output_trans"+str(epoch)+"epo.exr",spe_output)
+            
+    with torch.no_grad():
+        test = Data(transform=transform, input_path = input_path)
+        x_dif,y_dif,x_spe,y_spe,f_alb, tar_dif, tar_spe = test.test_set()
+        
+        tar_dif = tar_dif.unsqueeze(dim = 0)
+        tar_spe = tar_spe.unsqueeze(dim = 0)
+        
+        x_dif = x_dif.cuda().unsqueeze(dim=0)
+        tar_dif = tar_dif.cuda()
+        
+        x_spe = x_spe.cuda().unsqueeze(dim=0)
+        tar_spe = tar_spe.cuda()
+        
+        dif_kernel = diffuse_model(x_dif)
+        spe_kernel = specular_model(x_spe)
+
+        tar_dif_r, tar_dif_g, tar_dif_b = target_processing(tar_dif)
+        tar_dif_r, tar_dif_g, tar_dif_b = tar_dif_r.cuda(), tar_dif_g.cuda(), tar_dif_b.cuda()
+        tar_dif_r, tar_dif_g, tar_dif_b = (tar_dif_r * dif_kernel).sum(dim=1).unsqueeze(dim=1), (tar_dif_g * dif_kernel).sum(dim=1).unsqueeze(dim=1), (tar_dif_b * dif_kernel).sum(dim=1).unsqueeze(dim=1)
+
+        diffuse = torch.cat((tar_dif_r, tar_dif_g, tar_dif_b),dim=0)
+
+        tar_spe_r, tar_spe_g, tar_spe_b = target_processing(tar_spe)
+        tar_spe_r, tar_spe_g, tar_spe_b = tar_spe_r.cuda(), tar_spe_g.cuda(), tar_spe_b.cuda()
+        tar_spe_r, tar_spe_g, tar_spe_b = (tar_spe_r * spe_kernel).sum(dim=1).unsqueeze(dim=1), (tar_spe_g * spe_kernel).sum(dim=1).unsqueeze(dim=1), (tar_spe_b * spe_kernel).sum(dim=1).unsqueeze(dim=1)
+
+        specular = torch.cat((tar_spe_r, tar_spe_g, tar_spe_b),dim=0)
+
+        c_estimate = diffuse.mul(f_alb + 0.00316) + torch.exp(specular) - 1
+
+        c_estimate = c_estimate.cpu().data.numpy().copy() 
+        c_estimate = c_estimate.swapaxes(1,2).swapaxes(0,2)
+
+
+        exr.write(output_path+"filter.exr",c_estimate)
+            
+            
